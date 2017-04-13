@@ -79,69 +79,29 @@
             </p>
         </div>
         <div class="col-md-9 documentation-page">
-            <h2>Compiling Assets</h2>
-<p>Jigsaw sites are configured with support for <a href="http://laravel.com/docs/elixir">Laravel Elixir</a> out of the box. If you've ever used Elixir in a Laravel project, you already know how to use Elixir with Jigsaw.</p>
-<h3>Setup</h3>
-<p>To get started, first make sure you have Node.js and NPM installed in your environment.</p>
-<p>Once you have Node.js and NPM installed, pull in the dependencies needed to compile your assets:</p>
-<pre><code>$ npm install</code></pre>
-<p>For more detailed installation instructions, check out the <a href="https://laravel.com/docs/5.2/elixir#installation">full Elixir documentation</a>.</p>
-<h3>Organizing your assets</h3>
-<p>By default, any assets you want to process with Elixir should live in <code>source/_assets</code>:</p>
-<p><img src="../../img/asset-directory-structure.png" alt="Asset directory structure" /></p>
-<p>Elixir looks for each asset type <em>(like Sass, Less, or Coffeescript)</em> in a subfolder named after that asset type. We recommend following this convention to avoid additional configuration.</p>
-<p>By default, once your assets are compiled, they will be placed in their corresponding directories, directly under the <code>source</code> folder:</p>
-<p><img src="../../img/compiled-assets-directory-structure.png" alt="Compiled assets directory structure" /></p>
-<p>If you'd like to change the source and destination folders for your assets, edit the following lines in <code>gulpfile.js</code>:</p>
-<pre><code>elixir.config.assetsPath = 'source/_assets';
-elixir.config.publicPath = 'source';</code></pre>
-<h3>Enabling different preprocessors</h3>
-<p>Jigsaw ships with the following <code>gulpfile.js</code> and is configured to use Sass out of the box:</p>
-<pre><code class="language-js">var gulp = require('gulp');
-var elixir = require('laravel-elixir');
+            <h2>Helper Functions</h2>
+<p>In addition to storing variables in <code>config.php</code>, you can also define helper functions by adding a key with the name of the function and returning a closure. Helper functions are called by referencing the function name from the <code>$page</code> object in any Blade template.</p>
+<p>The function's closure automatically recieves the current <code>$page</code> as its first parameter. Additional parameters can be specified as well, and passed to the function when it is called in your template.</p>
+<p>For instance, you can add a function that identifies if the current page belongs to a particular section, for highlighting the currenct section in a menu template:</p>
+<blockquote>
+<p><em>config.php</em></p>
+</blockquote>
+<pre><code>&lt;?php
 
-elixir.config.assetsPath = 'source/_assets';
-elixir.config.publicPath = 'source';
-
-elixir(function(mix) {
-    mix.sass('main.scss')
-        .exec('jigsaw build', ['./source/**/*', '!./source/_assets/**/*'])
-        .browserSync({
-            server: { baseDir: 'build_local' },
-            proxy: null,
-            files: [ 'build_local/**/*' ]
-        });
-});</code></pre>
-<p>If you'd like to switch to Less, use Coffeescript, or take advantage of any other Elixir features, feel free to edit this file to your heart's content.</p>
-<p>Here's an example of what it might look like to use Less and Coffeescript:</p>
-<pre><code class="language-js">var gulp = require('gulp');
-var elixir = require('laravel-elixir');
-
-elixir.config.assetsPath = 'source/_assets';
-elixir.config.publicPath = 'source';
-
-elixir(function(mix) {
-    mix.less('main.less')
-        .coffee('scripts.coffee')
-        .exec('jigsaw build', ['./source/**/*', '!./source/_assets/**/*'])
-        .browserSync({
-            server: { baseDir: 'build_local' },
-            proxy: null,
-            files: [ 'build_local/**/*' ]
-        });
-});</code></pre>
-<h3>Compiling your assets</h3>
-<p>To compile your assets, run:</p>
-<pre><code>$ gulp</code></pre>
-<p>Once the assets have been compiled, <code>jigsaw build</code> will be run again automatically, so you can preview your changes in the browser.</p>
-<h3>Watching for changes</h3>
-<p>Manually running <code>gulp</code> every time you make a change gets old pretty fast.</p>
-<p>Instead, you can run the following command to watch your project for changes:</p>
-<pre><code>$ gulp watch</code></pre>
-<p>Any time any file changes in your project, your assets will be recompiled and Jigsaw will regenerate your static HTML pages.</p>
-<p>Using <code>gulp watch</code> also enables <a href="https://www.browsersync.io/">Browsersync</a>, so your browser will automatically reload any time you make a change. It also manages serving your site locally for you, so you don't need to start your own local PHP server.</p>
-<p>You can also watch a specific environment by passing the <code>--env</code> flag to gulp:</p>
-<pre><code>$ gulp watch --env=staging</code></pre>
+return [
+    'company' =&gt; 'Tighten Co',
+    'selected' =&gt; function ($page, $section) {
+        return str_contains($data-&gt;getPath(), $section) ? 'selected' : '';
+    },
+];</code></pre>
+<p>This function is accessible by calling <code>$page-&gt;selected()</code> from any page.</p>
+<p>Now, we can build a menu partial that highlights the current menu item for each page:</p>
+<blockquote>
+<p>_<em>menu.blade.php</em></p>
+</blockquote>
+<pre><code>&lt;a class="{{ $page-&gt;selected('about') }}" href="{{ $page-&gt;baseUrl }}/about"&gt;About Us&lt;/a&gt;
+&lt;a class="{{ $page-&gt;selected('projects') }}" href="{{ $page-&gt;baseUrl }}/projects"&gt;Projects&lt;/a&gt;
+&lt;a class="{{ $page-&gt;selected('posts') }}" href="{{ $page-&gt;baseUrl }}/posts"&gt;Blog&lt;/a&gt;</code></pre>
         </div>
     </div>
 </div>

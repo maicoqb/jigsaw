@@ -79,69 +79,83 @@
             </p>
         </div>
         <div class="col-md-9 documentation-page">
-            <h2>Compiling Assets</h2>
-<p>Jigsaw sites are configured with support for <a href="http://laravel.com/docs/elixir">Laravel Elixir</a> out of the box. If you've ever used Elixir in a Laravel project, you already know how to use Elixir with Jigsaw.</p>
-<h3>Setup</h3>
-<p>To get started, first make sure you have Node.js and NPM installed in your environment.</p>
-<p>Once you have Node.js and NPM installed, pull in the dependencies needed to compile your assets:</p>
-<pre><code>$ npm install</code></pre>
-<p>For more detailed installation instructions, check out the <a href="https://laravel.com/docs/5.2/elixir#installation">full Elixir documentation</a>.</p>
-<h3>Organizing your assets</h3>
-<p>By default, any assets you want to process with Elixir should live in <code>source/_assets</code>:</p>
-<p><img src="../../img/asset-directory-structure.png" alt="Asset directory structure" /></p>
-<p>Elixir looks for each asset type <em>(like Sass, Less, or Coffeescript)</em> in a subfolder named after that asset type. We recommend following this convention to avoid additional configuration.</p>
-<p>By default, once your assets are compiled, they will be placed in their corresponding directories, directly under the <code>source</code> folder:</p>
-<p><img src="../../img/compiled-assets-directory-structure.png" alt="Compiled assets directory structure" /></p>
-<p>If you'd like to change the source and destination folders for your assets, edit the following lines in <code>gulpfile.js</code>:</p>
-<pre><code>elixir.config.assetsPath = 'source/_assets';
-elixir.config.publicPath = 'source';</code></pre>
-<h3>Enabling different preprocessors</h3>
-<p>Jigsaw ships with the following <code>gulpfile.js</code> and is configured to use Sass out of the box:</p>
-<pre><code class="language-js">var gulp = require('gulp');
-var elixir = require('laravel-elixir');
+            <h2>Blade Templates &amp; Partials</h2>
+<p>One of the biggest benefits of a templating language is the ability to create reusable layouts and partials. Jigsaw gives you access to all the templating features and control structures of Blade that are available in Laravel 5.4 (learn more about Blade layouts in the <a href="https://laravel.com/docs/5.4/blade">official Blade documentation</a>).</p>
+<h3>Defining a Layout</h3>
+<p>Layouts themselves are just basic Blade templates that have one or more <code>@yield</code> calls where child templates can render their contents.</p>
+<p>A basic master layout could look like this:</p>
+<pre><code>&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+    &lt;head&gt;
+        &lt;title&gt;The Amazing Web&lt;/title&gt;
+    &lt;/head&gt;
+    &lt;body&gt;
+        &lt;header&gt;
+            My Amazing Site
+        &lt;/header&gt;
 
-elixir.config.assetsPath = 'source/_assets';
-elixir.config.publicPath = 'source';
+        @yield('contents')
 
-elixir(function(mix) {
-    mix.sass('main.scss')
-        .exec('jigsaw build', ['./source/**/*', '!./source/_assets/**/*'])
-        .browserSync({
-            server: { baseDir: 'build_local' },
-            proxy: null,
-            files: [ 'build_local/**/*' ]
-        });
-});</code></pre>
-<p>If you'd like to switch to Less, use Coffeescript, or take advantage of any other Elixir features, feel free to edit this file to your heart's content.</p>
-<p>Here's an example of what it might look like to use Less and Coffeescript:</p>
-<pre><code class="language-js">var gulp = require('gulp');
-var elixir = require('laravel-elixir');
+        &lt;footer&gt;
+            &lt;p&gt;©2016 Awesome Co&lt;/p&gt;
+        &lt;/footer&gt;
+    &lt;/body&gt;
+&lt;/html&gt;</code></pre>
+<p>Jigsaw provides a <code>source/_layouts</code> directory out of the box with a basic master layout.</p>
+<h3>Extending a Layout</h3>
+<p>To extend a layout, create a template that specifies which layout to extend in an <code>@extends</code> directive, and which section(s) to populate using the <code>@section</code> directive:</p>
+<pre><code>@extends('_layouts.master')
 
-elixir.config.assetsPath = 'source/_assets';
-elixir.config.publicPath = 'source';
+@section('contents')
 
-elixir(function(mix) {
-    mix.less('main.less')
-        .coffee('scripts.coffee')
-        .exec('jigsaw build', ['./source/**/*', '!./source/_assets/**/*'])
-        .browserSync({
-            server: { baseDir: 'build_local' },
-            proxy: null,
-            files: [ 'build_local/**/*' ]
-        });
-});</code></pre>
-<h3>Compiling your assets</h3>
-<p>To compile your assets, run:</p>
-<pre><code>$ gulp</code></pre>
-<p>Once the assets have been compiled, <code>jigsaw build</code> will be run again automatically, so you can preview your changes in the browser.</p>
-<h3>Watching for changes</h3>
-<p>Manually running <code>gulp</code> every time you make a change gets old pretty fast.</p>
-<p>Instead, you can run the following command to watch your project for changes:</p>
-<pre><code>$ gulp watch</code></pre>
-<p>Any time any file changes in your project, your assets will be recompiled and Jigsaw will regenerate your static HTML pages.</p>
-<p>Using <code>gulp watch</code> also enables <a href="https://www.browsersync.io/">Browsersync</a>, so your browser will automatically reload any time you make a change. It also manages serving your site locally for you, so you don't need to start your own local PHP server.</p>
-<p>You can also watch a specific environment by passing the <code>--env</code> flag to gulp:</p>
-<pre><code>$ gulp watch --env=staging</code></pre>
+&lt;div&gt;
+    &lt;p&gt;The contents of my amazing homepage.&lt;/p&gt;
+&lt;/div&gt;
+
+@endsection</code></pre>
+<p>Layouts and partials are referenced relative to the <code>source</code> directory using <em>dot notation</em>, where each dot represents a directory separator in the file name and the <code>.blade.php</code> extension omitted.</p>
+<h3>Partials</h3>
+<p>To include a template inside of another template, use the <code>@include</code> directive:</p>
+<pre><code>&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+    &lt;head&gt;
+        &lt;title&gt;The Amazing Web&lt;/title&gt;
+    &lt;/head&gt;
+    &lt;body&gt;
+        @include('_partials.header')
+
+        @yield('contents')
+
+        @include('_partials.footer')
+    &lt;/body&gt;
+&lt;/html&gt;</code></pre>
+<p>You can pass data to a partial by passing an associative array as a second parameter:</p>
+<pre><code>&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+    &lt;head&gt;
+        &lt;title&gt;The Amazing Web&lt;/title&gt;
+    &lt;/head&gt;
+    &lt;body&gt;
+        @include('_partials.header', ['page_title' =&gt; 'My Amazing Site'])
+
+        @yield('contents')
+
+        @include('_partials.footer')
+    &lt;/body&gt;
+&lt;/html&gt;</code></pre>
+<p>That data is then available in your partial as a normal variable:</p>
+<pre><code>&lt;!-- _partials/header.blade.php --&gt;
+&lt;header&gt;
+    {{ $page_title }}
+&lt;/header&gt;</code></pre>
+<h3>Preventing Layouts &amp; Partials from Rendering</h3>
+<p>Since it's important that layouts and partials are never rendered on their own, you need to be able to tell Jigsaw when a file shouldn't be rendered.</p>
+<p>To prevent a file or folder from being rendered, simply prefix it with an underscore:</p>
+<p><img src="../../img/layouts-directory.png" alt="Layouts folder" /></p>
+<p>Jigsaw gives you a <code>_layouts</code> folder by default, but as long as you prefix with an underscore, you can create any files or folders you need.</p>
+<p>For example, if you wanted a place to store all of your partials, you could create a directory called <code>_partials</code>:</p>
+<p><img src="../../img/partials-directory.png" alt="Partials folder" /></p>
+<p>Since the <code>_partials</code> folder starts with an underscore, those files won't be rendered when you generate your site, but will still be available to <code>@include</code> in your other templates.</p>
         </div>
     </div>
 </div>
